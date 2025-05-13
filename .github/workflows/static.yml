@@ -19,7 +19,14 @@ jobs:
       - name: Upload static content
         uses: actions/upload-pages-artifact@v1
         with:
-          path: '.'  # Ensure this is the root where index.html exists
+          path: '.'
+
+      # ✅ Explicitly include upload-artifact to resolve dependency
+      - name: Ensure artifact upload available
+        uses: actions/upload-artifact@v3
+        with:
+          name: dummy
+          path: ./.github/workflows/static.yml
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
