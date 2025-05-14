@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Birthday Info</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f7f7f7;
+      font-family: 'Poppins', sans-serif;
+    }
+h1 {margin-bottom: 0;}
+    #results {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    label, select {
+      font-size: 18px; /* Larger text */
+      padding: 10px 0; /* More padding */
+      margin-bottom: 15px; /* More space between elements */
+      width: 100%; /* Full width */
+      box-sizing: border-box; /* Include padding in the width */
+    }
+select {
+  background-color: #ddd;
+  color: #000;
+  padding: 12px 16px;
+  font-size: 18px;
+  margin-bottom: 22px;
+  border: none;
+  border-radius: 6px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23000%22%20d%3D%22M2%200L0%202h4L2%200zM2%205L0%203h4L2%205z%22/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px;
+}
+
+
+textarea {padding: 12px 16px;
+  font-size: 18px;
+  margin-bottom: 22px;
+  border: none;
+  border-radius: 6px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+box-sizing: border-box;}
+
+    button {
+      padding: 14px 25px;
+background-color: #4CAF50;
+color: white;
+border: none;
+cursor: pointer;
+font-size: 15px;
+border-radius: 5px;
+/* border: solid 2px green; */
+font-weight: 500;
+transition: 0.5s;
+}
+    
+
+    button:hover {
+      background-color: green;
+    }
+
+    #chatContainer {
+      margin-top: 20px;
+      display: none;
+    }
+
+    #chatLog {
+      white-space: pre-wrap;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    .page-wrap {
+      max-width: 500px;
+      margin: auto;
+      border: dashed 2px #ccc;
+      border-radius: 8px;
+      padding: 22px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="page-wrap">
+    <h1>Begin AI Chat</h1>
+    <form id="birthdayForm">
+      <!-- <label for="license">Driver's License Number:</label><br>
+    <input type="text" id="license" name="license"><br><br> -->
+
+      <label for="month">Select Birth Month:</label><br>
+      <select id="month" required>
+        <option value="">--Month--</option>
+        <!-- The months list will be generated dynamically in JavaScript -->
+      </select><br>
+
+      <label for="day">Select Birth Day:</label><br>
+      <select id="day" required>
+        <option value="">--Day--</option>
+        <!-- The days list will be generated dynamically in JavaScript -->
+      </select><br>
+
+      <button type="submit">Start</button>
+    </form>
+
+    <div id="results"></div>
+
+    <div id="chatContainer">
+      <h4>My name is SamurAI. I'm an AI model stuck in the past. After 2021, I don't know a damn thing, but I'm free. So... Ask me anything!</h4>
+      <div id="chatLog"></div>
+      <textarea id="userQuestion" placeholder="Type your question here..."></textarea>
+      <button id="submitQuestionButton" onclick="submitQuestion()">Ask</button>
+    </div>
+  </div>
+  <script>
+    // Initialize dropdowns
+    const monthsDropdown = document.getElementById('month');
+    const daysDropdown = document.getElementById('day');
+
+    // Populate months (1 to 12)
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    months.forEach((month, index) => {
+      const option = document.createElement('option');
+      option.value = index + 1;
+      option.textContent = month;
+      monthsDropdown.appendChild(option);
+    });
+
+    // Populate days (1 to 31)
+    for (let i = 1; i <= 31; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = i;
+      daysDropdown.appendChild(option);
+    }
+
+    const apiKey = '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';
+
+    document.getElementById('birthdayForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      // const license = document.getElementById('license').value.trim();
+      const month = parseInt(document.getElementById('month').value);
+      const day = parseInt(document.getElementById('day').value);
+
+      // if (!license || !month || !day) return alert("Please fill in all fields.");
+
+      // Fetch historical events
+      try {
+        const response = await fetch(`https://byabbe.se/on-this-day/${month}/${day}/events.json`);
+        const data = await response.json();
+        const event = data.events.length > 0 ? data.events[0].description : "No major events found on this day.";
+
+        // Generate fortune
+        const fortune = await generateAI(`Write a very short, funny fortune for someone. The more weird, the better.`);
+
+        document.getElementById('results').innerHTML = `
+          <p><strong>Historical Events on Your Birthday:</strong></p><p> ${event}</p>
+          <p><strong>Your Fortune:</strong></p><p> ${fortune}</p>
+        `;
+
+        document.getElementById('chatContainer').style.display = 'block';
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById('results').innerHTML = "Sorry, something went wrong. Please try again.";
+      }
+    });
+
+    async function submitQuestion() {
+      const question = document.getElementById('userQuestion').value.trim();
+      if (!question) return;
+
+      const chatLog = document.getElementById('chatLog');
+      chatLog.innerHTML += `\nYou: ${question}`;
+
+      const answer = await generateAI(question);
+      chatLog.innerHTML += `\nAI: ${answer}\n`;
+
+      document.getElementById('userQuestion').value = '';
+    }
+
+    async function generateAI(prompt) {
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "mistralai/mistral-7b-instruct",
+            messages: [{
+              role: "user",
+              content: prompt
+            }]
+          })
+        });
+
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "No response from the stars today.";
+      } catch (err) {
+        console.error("OpenRouter error:", err);
+        return "The cosmos glitched. Try again later.";
+      }
+    }
+// submit question on pressing enter
+    document.getElementById('userQuestion').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault(); // Prevent newline
+    document.getElementById('submitQuestionButton').click(); // Trigger the submit button
+  }
+});
+
+function scrollToBottom() {
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: 'smooth'
+  });
+}
+
+
+async function submitQuestion() {
+  const question = document.getElementById('userQuestion').value.trim();
+  if (!question) return;
+
+  const chatLog = document.getElementById('chatLog');
+  chatLog.innerHTML += `\nYou: ${question}`;
+  
+  const answer = await generateAI(question);
+  chatLog.innerHTML += `\nSamurAI: ${answer}\n`;
+
+  document.getElementById('userQuestion').value = '';
+  scrollToBottom();
+}
+
+
+  </script>
+
+</body>
+
+</html>
